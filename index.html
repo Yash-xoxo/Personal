@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            max-width: 500px;
+            width: 100%;
+        }
+        li {
+            background: white;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Write Something</h1>
+    <textarea id="note" rows="5" placeholder="Write here..."></textarea>
+    <button onclick="saveNote()">Save</button>
+    
+    <h2>Previous Notes</h2>
+    <ul id="notesList"></ul>
+    
+    <script>
+        const SUPABASE_URL = "https://gicoylvvcdzhflsisquv.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpY295bHZ2Y2R6aGZsc2lzcXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2NTI5NzEsImV4cCI6MjA1OTIyODk3MX0.28Cex9QzQTePUiRTdEMSvEp24wZieJ6rl2qL8G4VOQg";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function saveNote() {
+            const noteText = document.getElementById("note").value;
+            if (!noteText.trim()) return alert("Note cannot be empty");
+            
+            const { data, error } = await supabase.from("notes").insert([{ text: noteText }]);
+            if (error) {
+                console.error("Error saving note:", error);
+            } else {
+                document.getElementById("note").value = "";
+                loadNotes();
+            }
+        }
+
+        async function loadNotes() {
+            const { data, error } = await supabase.from("notes").select("text");
+            if (error) {
+                console.error("Error loading notes:", error);
+            } else {
+                const notesList = document.getElementById("notesList");
+                notesList.innerHTML = "";
+                data.forEach(note => {
+                    const li = document.createElement("li");
+                    li.textContent = note.text;
+                    notesList.appendChild(li);
+                });
+            }
+        }
+
+        loadNotes();
+    </script>
+</body>
+</html>
